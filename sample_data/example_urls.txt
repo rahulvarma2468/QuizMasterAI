@@ -1,0 +1,31 @@
+Example Wikipedia URLs for Testing:
+
+1. Artificial Intelligence
+   https://en.wikipedia.org/wiki/Artificial_intelligence
+
+2. Python (programming language)
+   https://en.wikipedia.org/wiki/Python_(programming_language)
+
+3. Machine Learning
+   https://en.wikipedia.org/wiki/Machine_learning
+
+4. Quantum Computing
+   https://en.wikipedia.org/wiki/Quantum_computing
+
+5. Renewable Energy
+   https://en.wikipedia.org/wiki/Renewable_energy
+
+6. Climate Change
+   https://en.wikipedia.org/wiki/Climate_change
+
+7. Solar System
+   https://en.wikipedia.org/wiki/Solar_System
+
+8. World War II
+   https://en.wikipedia.org/wiki/World_War_II
+
+9. Ancient Egypt
+   https://en.wikipedia.org/wiki/Ancient_Egypt
+
+10. The Great Wall of China
+    https://en.wikipedia.org/wiki/Great_Wall_of_China
