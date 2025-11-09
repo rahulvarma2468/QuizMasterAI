@@ -14,9 +14,12 @@ lxml>=4.9.3
 # Data Validation
 pydantic>=1.10.12
 
-# Google Generative AI (official SDK)
-# Leave unpinned to allow pip to select a compatible release for your Python/platform.
-google-generativeai
+# Google Generative AI (official SDK) - OPTIONAL
+# The Gemini / google-generativeai SDK can be hard to install on some
+# platforms/Python versions. Keep it out of the base requirements so the
+# app can install and run without the LLM. To enable LLM features, install
+# the optional requirements file:
+#   pip install -r backend/requirements-llm.txt
 
 # LangChain (optional - only needed if you use LangChain features)
 langchain-core==0.1.16

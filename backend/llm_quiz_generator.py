@@ -1,7 +1,16 @@
 import os
 import json
 from dotenv import load_dotenv
-import google.generativeai as genai
+
+# Attempt to import the optional Google Generative AI SDK. If it's not
+# installed (for example in a PaaS build that couldn't install the wheel),
+# we keep a clear flag and raise a helpful error when generate_quiz is used.
+try:
+    import google.generativeai as genai
+    HAS_GENAI = True
+except Exception:
+    genai = None
+    HAS_GENAI = False
 
 # Load environment variables
 load_dotenv()
@@ -20,11 +29,20 @@ def generate_quiz(article_title: str, article_content: str) -> dict:
     Raises:
         ValueError: If API key is not set or generation fails
     """
+    # Check SDK availability
+    if not HAS_GENAI:
+        raise RuntimeError(
+            "google-generativeai SDK is not installed.\n"
+            "To enable quiz generation install the optional LLM requirements:\n"
+            "  pip install -r backend/requirements-llm.txt\n"
+            "Or choose a Python 3.11 runtime on your PaaS so compatible wheels can be found."
+        )
+
     # Get API key
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise ValueError("GEMINI_API_KEY environment variable not set")
-    
+
     # Configure the Gemini API
     genai.configure(api_key=api_key)
     
