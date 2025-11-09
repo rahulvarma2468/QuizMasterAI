@@ -40,6 +40,8 @@ def scrape_wikipedia_article(url: str) -> Dict[str, str]:
         }
     
     except requests.exceptions.RequestException as e:
-        raise Exception(f"Failed to fetch Wikipedia article: {str(e)}")
+        raise ValueError(f"Failed to fetch Wikipedia article: {str(e)}")
+    except ValueError:
+        raise
     except Exception as e:
-        raise Exception(f"Failed to parse Wikipedia article: {str(e)}")
+        raise ValueError(f"Failed to parse Wikipedia article: {str(e)}")
