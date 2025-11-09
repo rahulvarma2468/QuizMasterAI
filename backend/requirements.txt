@@ -15,7 +15,8 @@ lxml>=4.9.3
 pydantic>=1.10.12
 
 # Google Generative AI (official SDK)
-google-generativeai==0.17.0
+# Leave unpinned to allow pip to select a compatible release for your Python/platform.
+google-generativeai
 
 # LangChain (optional - only needed if you use LangChain features)
 langchain-core==0.1.16
