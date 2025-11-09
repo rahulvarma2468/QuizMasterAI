@@ -10,15 +10,17 @@
 
 ## Recent Changes
 
-### November 9, 2025 - Initial Implementation
+### November 9, 2025 - Initial Implementation & Completion
 - Created complete backend with FastAPI, SQLAlchemy, and Gemini AI integration
-- Implemented Wikipedia scraper using BeautifulSoup
+- Implemented Wikipedia scraper using BeautifulSoup with proper error handling
 - Built LangChain-based quiz generator with structured prompts
-- Created React + Tailwind frontend with two-tab interface
+- Created React + Tailwind frontend with React Router for URL-based navigation
 - Set up PostgreSQL database with Quiz model
 - Configured workflows for both backend (port 8000) and frontend (port 5000)
 - Added comprehensive README and sample data
-- Successfully tested both servers - all running properly
+- Implemented React Router with /generate and /history routes
+- Fixed error handling to return appropriate HTTP status codes (400 for client errors)
+- Successfully tested both servers - all features working properly
 
 ## Tech Stack
 
@@ -34,6 +36,7 @@
 - React 18
 - Vite (build tool)
 - Tailwind CSS (styling)
+- React Router (routing)
 - Axios (API client)
 
 ## Project Architecture
