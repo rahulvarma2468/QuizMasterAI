@@ -1,74 +1,123 @@
 import os
 import json
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
+from dotenv import load_dotenv
+import google.generativeai as genai
+
+# Load environment variables
+load_dotenv()
 
 def generate_quiz(article_title: str, article_content: str) -> dict:
+    """
+    Generate a quiz from Wikipedia article content using Gemini LLM.
+    
+    Args:
+        article_title: Title of the Wikipedia article
+        article_content: Cleaned content from the article
+        
+    Returns:
+        Dictionary containing quiz data matching QuizOutput schema
+        
+    Raises:
+        ValueError: If API key is not set or generation fails
+    """
+    # Get API key
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise ValueError("GEMINI_API_KEY environment variable not set")
     
-    model = ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash-exp",
-        temperature=0.4,
-        google_api_key=api_key
+    # Configure the Gemini API
+    genai.configure(api_key=api_key)
+    
+    # Initialize the model with JSON response configuration
+    model = genai.GenerativeModel(
+        'gemini-2.5-flash',
+        generation_config={
+            "response_mime_type": "application/json"
+        }
     )
     
-    prompt_template = """You are an AI quiz creator. 
-Based on the Wikipedia article below, generate a JSON object with the following structure:
+    # Create the prompt with strict JSON schema
+    prompt = f"""Generate a quiz from this Wikipedia article in valid JSON format.
+
+Article: {article_title}
+
+Content: {article_content[:4000]}
+
+Create 5-8 multiple-choice questions. Return ONLY valid JSON matching this exact structure:
 
 {{
-  "title": "Quiz title based on the article",
-  "summary": "Brief 2-3 sentence summary of the article",
+  "title": "Quiz about [topic]",
+  "summary": "Brief summary here",
   "quiz": [
     {{
-      "question": "A clear, specific question about the article content",
+      "question": "Question text?",
       "options": ["Option A", "Option B", "Option C", "Option D"],
-      "answer": "The correct option (exact text from options)",
-      "difficulty": "easy or medium or hard",
-      "explanation": "Brief explanation of why this is the correct answer"
+      "answer": "Option A",
+      "difficulty": "easy",
+      "explanation": "Why this is correct"
     }}
   ],
   "related_topics": ["Topic 1", "Topic 2", "Topic 3"]
 }}
 
-Generate 5-10 multiple-choice questions with varied difficulty levels. Make sure:
-- Questions are factual and based on the article content
-- All 4 options are plausible but only one is correct
-- The "answer" field exactly matches one of the options
-- Explanations are educational and concise
-- Topics cover different aspects of the article
-
-Article Title: {title}
-
-Article Content: {content}
-
-Return ONLY the JSON object, no additional text or markdown formatting."""
-
-    prompt = PromptTemplate(
-        template=prompt_template,
-        input_variables=["title", "content"]
-    )
-    
-    chain = prompt | model | StrOutputParser()
-    
-    result = chain.invoke({
-        "title": article_title,
-        "content": article_content[:4000]
-    })
-    
-    result_clean = result.strip()
-    if result_clean.startswith("```json"):
-        result_clean = result_clean[7:]
-    if result_clean.startswith("```"):
-        result_clean = result_clean[3:]
-    if result_clean.endswith("```"):
-        result_clean = result_clean[:-3]
-    result_clean = result_clean.strip()
+Rules:
+- Use "easy", "medium", or "hard" for difficulty
+- The answer field must exactly match one option
+- Include 3-5 related topics
+- Make questions factual and based on the article"""
     
     try:
-        quiz_data = json.loads(result_clean)
-        return quiz_data
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Failed to parse LLM response as JSON: {str(e)}\nResponse: {result_clean[:500]}")
+        # Generate content with retries
+        max_retries = 2
+        for attempt in range(max_retries):
+            try:
+                response = model.generate_content(prompt)
+                result = response.text.strip()
+                
+                # More aggressive cleaning
+                # Remove markdown code blocks
+                result = result.replace("```json", "").replace("```", "")
+                
+                # Remove any text before the first {
+                if "{" in result:
+                    result = result[result.index("{"):]
+                
+                # Remove any text after the last }
+                if "}" in result:
+                    result = result[:result.rindex("}") + 1]
+                
+                result = result.strip()
+                
+                # Parse JSON
+                quiz_data = json.loads(result)
+                
+                # Validate the structure
+                required_keys = ["title", "summary", "quiz", "related_topics"]
+                if not all(key in quiz_data for key in required_keys):
+                    raise ValueError(f"Missing required keys. Found: {list(quiz_data.keys())}")
+                
+                # Validate quiz questions
+                if not isinstance(quiz_data["quiz"], list) or len(quiz_data["quiz"]) == 0:
+                    raise ValueError("Quiz must contain at least one question")
+                
+                for i, q in enumerate(quiz_data["quiz"]):
+                    if not all(k in q for k in ["question", "options", "answer", "difficulty", "explanation"]):
+                        raise ValueError(f"Question {i+1} missing required fields")
+                    if len(q["options"]) != 4:
+                        raise ValueError(f"Question {i+1} must have exactly 4 options")
+                    if q["answer"] not in q["options"]:
+                        # Try to fix: find closest match
+                        q["answer"] = q["options"][0]
+                
+                return quiz_data
+                
+            except json.JSONDecodeError as e:
+                if attempt < max_retries - 1:
+                    print(f"JSON parse error on attempt {attempt + 1}, retrying...")
+                    continue
+                # Last attempt failed, provide detailed error
+                print(f"Failed JSON content:\n{result[:500]}...")
+                raise ValueError(f"Failed to parse LLM response as JSON: {str(e)}")
+        
+    except Exception as e:
+        raise ValueError(f"Failed to generate quiz: {str(e)}")

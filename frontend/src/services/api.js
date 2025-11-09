@@ -1,13 +1,14 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 export const generateQuiz = async (url) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/generate_quiz`, { url });
     return response.data;
   } catch (error) {
-    throw error.response?.data?.detail || 'Failed to generate quiz';
+    console.error('Generate quiz error:', error);
+    throw error.response?.data?.detail || error.message || 'Failed to generate quiz';
   }
 };
 
@@ -16,7 +17,8 @@ export const getHistory = async () => {
     const response = await axios.get(`${API_BASE_URL}/history`);
     return response.data;
   } catch (error) {
-    throw error.response?.data?.detail || 'Failed to fetch history';
+    console.error('Get history error:', error);
+    throw error.response?.data?.detail || error.message || 'Failed to fetch history';
   }
 };
 
@@ -25,6 +27,7 @@ export const getQuiz = async (quizId) => {
     const response = await axios.get(`${API_BASE_URL}/quiz/${quizId}`);
     return response.data;
   } catch (error) {
-    throw error.response?.data?.detail || 'Failed to fetch quiz';
+    console.error('Get quiz error:', error);
+    throw error.response?.data?.detail || error.message || 'Failed to fetch quiz';
   }
 };

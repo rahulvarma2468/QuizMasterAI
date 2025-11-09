@@ -80,8 +80,13 @@ const HistoryTab = () => {
               >
                 View Original Article →
               </a>
+              <div className="mt-2 bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
+                <p className="text-sm text-blue-900">
+                  📖 <strong>Review Mode:</strong> All correct answers are shown below. This is a study guide view.
+                </p>
+              </div>
             </div>
-            <QuizDisplay quizData={selectedQuiz.quiz_data} />
+            <QuizDisplay quizData={selectedQuiz.quiz_data} reviewMode={true} />
           </div>
         )}
       </Modal>
