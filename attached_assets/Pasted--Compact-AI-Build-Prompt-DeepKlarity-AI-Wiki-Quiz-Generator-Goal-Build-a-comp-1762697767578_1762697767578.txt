@@ -1,0 +1,150 @@
+
+
+## ⚡ **Compact AI Build Prompt – DeepKlarity AI Wiki Quiz Generator**
+
+**Goal:**
+Build a complete **AI Wiki Quiz Generator** web app using **FastAPI (Python)** for backend and **React + Tailwind** for frontend.
+The app should take a **Wikipedia article URL**, scrape it, generate a **quiz using Gemini (via LangChain)**, store the result in **MySQL/PostgreSQL**, and display it neatly in the UI.
+
+---
+
+### 🧠 Core Flow
+
+1. User inputs Wikipedia URL.
+2. Backend scrapes article using **BeautifulSoup** (no Wikipedia API).
+3. Sends clean text to **Gemini model** (via `langchain-google-genai`).
+4. LLM generates 5–10 multiple-choice questions with answers, difficulty, and explanations.
+5. Result + metadata saved in DB.
+6. Frontend displays quiz + history tab for all past quizzes.
+
+---
+
+### ⚙️ Backend (Python – FastAPI)
+
+**Requirements:**
+`fastapi, uvicorn, sqlalchemy, requests, beautifulsoup4, pydantic, langchain-core, langchain-community, langchain-google-genai, python-dotenv`
+
+**Files & Features:**
+
+```
+backend/
+├── main.py                 # FastAPI app + endpoints
+├── database.py             # SQLAlchemy setup
+├── scraper.py              # Wikipedia scraper
+├── llm_quiz_generator.py   # Gemini + LangChain quiz generator
+├── models.py               # Pydantic schema
+├── requirements.txt
+└── .env                    # GEMINI_API_KEY
+```
+
+**Endpoints:**
+
+* `POST /generate_quiz`: scrape + generate + store + return JSON
+* `GET /history`: return all past quizzes
+* `GET /quiz/{id}`: return one quiz by ID
+
+**DB Model:**
+
+```
+Quiz {
+  id (int, PK)
+  url (string)
+  title (string)
+  date_generated (datetime)
+  scraped_content (text)
+  full_quiz_data (text/json)
+}
+```
+
+---
+
+### 🤖 LLM Prompt (used in `llm_quiz_generator.py`)
+
+```
+You are an AI quiz creator. 
+Based on the Wikipedia article below, generate JSON with:
+{
+  "title": "",
+  "summary": "",
+  "quiz": [
+    {
+      "question": "",
+      "options": ["A","B","C","D"],
+      "answer": "",
+      "difficulty": "easy|medium|hard",
+      "explanation": "",
+    }
+  ],
+  "related_topics": [...]
+}
+Article content: {{ article_text }}
+```
+
+Use:
+
+```python
+from langchain_google_genai import ChatGoogleGenerativeAI
+model = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.4)
+```
+
+---
+
+### 💻 Frontend (React + Tailwind)
+
+**Structure:**
+
+```
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── QuizDisplay.jsx
+│   │   ├── HistoryTable.jsx
+│   │   └── Modal.jsx
+│   ├── tabs/
+│   │   ├── GenerateQuizTab.jsx
+│   │   └── HistoryTab.jsx
+│   ├── services/api.js
+│   ├── App.jsx
+│   └── index.css
+```
+
+**Features:**
+
+* **Tab 1:** URL input → “Generate Quiz” → displays structured quiz cards
+* **Tab 2:** History table → “Details” button → modal showing quiz
+* Optional: “Take Quiz” mode hiding answers
+
+---
+
+### 📦 Deliverables
+
+* Working backend + frontend
+* Sample data folder (`sample_data/`) with Wikipedia URLs & JSON outputs
+* Screenshots of:
+
+  1. Quiz generation page
+  2. History view with modal
+* README with setup & usage
+* LangChain prompt templates
+
+---
+
+### 🚫 Rules
+
+* Backend **must be Python (FastAPI/Django/Flask)** — **no Node.js backend** allowed.
+* Use Gemini (via LangChain) for quiz generation.
+* Submit only after verifying correctness and completeness.
+* Must be fully functional before deadline.
+
+---
+
+### ✅ Output Expectation
+
+Generate a **ready-to-run full-stack project** matching all above specs:
+
+* FastAPI backend with Gemini integration
+* React + Tailwind frontend
+* Database (MySQL/PostgreSQL)
+* Functional `/generate_quiz`, `/history`, `/quiz/{id}` endpoints
+* Modular, clean, and submission-ready code.
+
