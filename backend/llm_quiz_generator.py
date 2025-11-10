@@ -46,43 +46,40 @@ def generate_quiz(article_title: str, article_content: str) -> dict:
     # Configure the Gemini API
     genai.configure(api_key=api_key)
     
-    # Initialize the model with JSON response configuration
-    model = genai.GenerativeModel(
-        'gemini-2.5-flash',
-        generation_config={
-            "response_mime_type": "application/json"
-        }
-    )
+    # Initialize the model (without response_mime_type for compatibility)
+    model = genai.GenerativeModel('gemini-2.5-flash')
     
     # Create the prompt with strict JSON schema
-    prompt = f"""Generate a quiz from this Wikipedia article in valid JSON format.
+    prompt = f"""Generate a quiz from this Wikipedia article. You MUST respond with ONLY valid JSON, no other text.
 
 Article: {article_title}
 
 Content: {article_content[:4000]}
 
-Create 5-8 multiple-choice questions. Return ONLY valid JSON matching this exact structure:
+Return ONLY this exact JSON structure (no markdown, no explanation, just JSON):
 
 {{
-  "title": "Quiz about [topic]",
-  "summary": "Brief summary here",
+  "title": "Quiz about {article_title}",
+  "summary": "Brief 2-3 sentence summary of the article",
   "quiz": [
     {{
-      "question": "Question text?",
+      "question": "Question text here?",
       "options": ["Option A", "Option B", "Option C", "Option D"],
       "answer": "Option A",
       "difficulty": "easy",
-      "explanation": "Why this is correct"
+      "explanation": "Brief explanation why this is correct"
     }}
   ],
   "related_topics": ["Topic 1", "Topic 2", "Topic 3"]
 }}
 
-Rules:
-- Use "easy", "medium", or "hard" for difficulty
-- The answer field must exactly match one option
+IMPORTANT RULES:
+- Create 5-8 multiple-choice questions
+- Use ONLY "easy", "medium", or "hard" for difficulty
+- The answer field MUST exactly match one of the options
 - Include 3-5 related topics
-- Make questions factual and based on the article"""
+- Make questions factual and based on the article content
+- Return ONLY valid JSON, no markdown code blocks, no extra text"""
     
     try:
         # Generate content with retries
