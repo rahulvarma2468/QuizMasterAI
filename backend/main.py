@@ -17,18 +17,16 @@ app = FastAPI(
 )
 
 # Configure CORS to allow frontend communication
-# Update with your Vercel URL after deployment
 origins = [
     "http://localhost:5173",  # Local Vite dev server
     "http://localhost:5174",
     "https://*.vercel.app",   # All Vercel preview/production deployments
-    # Add your specific domain after deployment:
-    # "https://quiz-master-ai.vercel.app",
+    "https://quizmasterai.onrender.com",  # Backend (for testing)
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # Allow all origins for easier deployment
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
