@@ -3,7 +3,7 @@ fastapi==0.109.0
 uvicorn[standard]==0.27.0
 
 # Database
-SQLAlchemy==2.0.25
+SQLAlchemy>=2.0.36  # 2.0.36+ supports Python 3.13
 psycopg2-binary==2.9.9
 
 # Web Scraping
